@@ -28,8 +28,12 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
 
+  const socketUrl = import.meta.env.DEV
+    ? `${socketProtocol}://localhost:3000`
+    : "";
+
   useEffect(() => {
-    const socket = io(`${socketProtocol}://localhost:3000`, {
+    const socket = io(socketUrl, {
       transports: ["websocket"], // allow fallback
       autoConnect: true,
       withCredentials: true,
