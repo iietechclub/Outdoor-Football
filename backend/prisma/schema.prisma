@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MatchStatus {
+  NotStarted
+  InProgress
+  Paused
+  Finished
+}
+
+enum MatchStage {
+  FirstHalf
+  Halftime
+  SecondHalf
+  ExtraTime
+  PenaltyShootout
+}
+
+model Match {
+  id String @id @default(uuid())
+
+  isLive Boolean     @default(false)
+  stage  MatchStage  @default(FirstHalf)
+  status MatchStatus @default(NotStarted)
+
+  startTime             DateTime?
+  firstHalfElapsedTime  Int       @default(0)
+  secondHalfElapsedTime Int       @default(0)
+  extraTimeElapsedTime  Int       @default(0)
+
+  homeTeamGoals Goal[] @relation("HomeTeamGoals")
+  awayTeamGoals Goal[] @relation("AwayTeamGoals")
+
+  homeTeam   Team   @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  homeTeamId String
+
+  awayTeam   Team   @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  awayTeamId String
+
+  scheduledAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Goal {
+  id        String  @id @default(uuid())
+  isPenalty Boolean @default(false)
+
+  team   Team   @relation(fields: [teamId], references: [id])
+  teamId String
+
+  player   Player @relation(fields: [playerId], references: [id])
+  playerId String
+
+  matchHomeTeam   Match?  @relation("HomeTeamGoals", fields: [matchHomeTeamId], references: [id])
+  matchHomeTeamId String?
+
+  matchAwayTeam   Match?  @relation("AwayTeamGoals", fields: [matchAwayTeamId], references: [id])
+  matchAwayTeamId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Team {
+  id      String   @id @default(uuid())
+  name    String
+  players Player[]
+
+  homeMatches Match[] @relation("HomeTeam")
+  awayMatches Match[] @relation("AwayTeam")
+
+  goals Goal[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Player {
+  id   String @id @default(uuid())
+  name String
+
+  team   Team   @relation(fields: [teamId], references: [id])
+  teamId String
+
+  goals Goal[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -1,0 +1,57 @@
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { io, Socket } from "socket.io-client";
+
+type SocketContextType = {
+  socket: Socket | null;
+  isConnected: boolean;
+};
+
+const SocketContext = createContext<SocketContextType>({
+  socket: null,
+  isConnected: false,
+});
+
+type SocketProviderProps = {
+  children: React.ReactNode;
+};
+
+const socketProtocol =
+  import.meta.env.PROD && !import.meta.env.VITE_DEV ? "wss" : "ws";
+
+export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
+  const [isConnected, setIsConnected] = useState(false);
+  const socketRef = useRef<Socket | null>(null);
+
+  useEffect(() => {
+    const socket = io(`${socketProtocol}://localhost:3000`, {
+      transports: ["websocket"], // allow fallback
+      autoConnect: true,
+      withCredentials: true,
+    });
+    socketRef.current = socket;
+
+    socket.on("connect", () => setIsConnected(true));
+    socket.on("disconnect", () => setIsConnected(false));
+    socket.on("connect_error", () => setIsConnected(false));
+
+    return () => {
+      if (socket && socket.connected) socket.disconnect();
+      else if (socket) socket.close();
+      socketRef.current = null;
+    };
+  }, []);
+
+  return (
+    <SocketContext.Provider value={{ socket: socketRef.current, isConnected }}>
+      {children}
+    </SocketContext.Provider>
+  );
+};
+
+export const useSocket = () => useContext(SocketContext);

@@ -1,0 +1,39 @@
+{
+  "name": "express",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon",
+    "start": "cross-env NODE_ENV=production tsx src/index.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.15.0",
+    "@prisma/extension-accelerate": "2.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "5.1.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.3",
+    "@types/node": "22.15.32",
+    "cross-env": "^10.0.0",
+    "nodemon": "^3.1.10",
+    "prisma": "^6.15.0",
+    "ts-node": "10.9.2",
+    "tsx": "^4.20.5",
+    "typescript": "5.8.2"
+  },
+  "nodemonConfig": {
+    "ext": "js,ts",
+    "watch": [
+      "src",
+      ".env"
+    ],
+    "ignore": [
+      "build",
+      "node_modules"
+    ],
+    "exec": "tsx src/index.ts"
+  }
+}
