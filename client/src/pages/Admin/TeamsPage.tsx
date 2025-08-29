@@ -23,6 +23,16 @@ export default function TeamsPage() {
   const [teams, setTeams] = React.useState<Team[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const [notification, setNotification] = useState<string>("");
+
+  function showNotification(message: string) {
+    setNotification(message);
+    let id = setTimeout(() => {
+      setNotification("");
+      clearTimeout(id);
+    }, 6000);
+  }
+
   function onEditorClose() {
     setEditor({ open: false, mode: "add", defaultValues: null });
   }
@@ -67,8 +77,8 @@ export default function TeamsPage() {
     const res = await fetch(`${config.apiUrl}/api/teams/${teamId}`, {
       method: "DELETE",
     });
-    if (!res.ok) {
-      return console.error("Failed to delete team");
+    if (!res.ok && res.status === 400) {
+      return showNotification((await res.json()).message);
     }
 
     fetchTeams();
@@ -80,6 +90,14 @@ export default function TeamsPage() {
 
   return (
     <div>
+      <div className="relative">
+        {notification && (
+          <div className="absolute top-0 left-0 z-10 rounded-xl border border-blue-600 bg-yellow-50 px-5 py-2 font-medium shadow-lg">
+            {notification}
+          </div>
+        )}
+      </div>
+
       <div className="mb-4 flex items-center justify-between gap-3">
         <h1 className="mb-2 text-2xl font-semibold">Teams</h1>
         <button

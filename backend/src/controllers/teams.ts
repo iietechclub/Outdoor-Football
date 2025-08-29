@@ -61,9 +61,32 @@ export const updateTeam = async (req: Request, res: Response) => {
 export const deleteTeam = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    await db.team.delete({
+    const team = await db.team.findUnique({
       where: { id },
+      select: {
+        _count: {
+          select: { players: true, awayMatches: true, homeMatches: true },
+        },
+      },
     });
+
+    if (!team) return res.status(404).send();
+
+    const { players, homeMatches, awayMatches } = team._count;
+
+    if (players) {
+      return res
+        .status(400)
+        .json({ message: "This team has players, delete them first." });
+    }
+
+    if (awayMatches || homeMatches) {
+      return res.status(400).json({
+        message: "This team is included in a match, delete that match first.",
+      });
+    }
+
+    await db.team.delete({ where: { id } });
     res.status(204).send();
   } catch (error) {
     res.status(500).json({ error: "Failed to delete team" });

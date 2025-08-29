@@ -51,7 +51,6 @@ export default function useTimer() {
     socket.emit("timer:request");
 
     socket.on("timer:start", (remainingTime: number) => {
-      console.log("Timer started:", remainingTime);
       startTimer(remainingTime < 0 ? 0 : remainingTime);
     });
 

@@ -29,6 +29,11 @@ export default function PlayersPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showWarning, setShowWarning] = useState<{
+    title: string;
+    message: string;
+    data: any;
+  } | null>(null);
 
   function onEditorClose() {
     setEditor({ open: false, mode: "add", defaultValues: null });
@@ -84,6 +89,15 @@ export default function PlayersPage() {
 
     await fetchPlayers();
     onEditorClose();
+  }
+
+  function showDeleteWarning(playerId: string) {
+    setShowWarning({
+      title: "Confirm Deletion",
+      message:
+        "Are you sure you want to delete this player? It will remove all his associated goals!",
+      data: playerId,
+    });
   }
 
   async function handleDelete(playerId: string) {
@@ -147,7 +161,7 @@ export default function PlayersPage() {
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(id)}
+                    onClick={() => showDeleteWarning(id)}
                     className="cursor-pointer rounded-full bg-red-500 px-4 py-1 text-sm text-white"
                   >
                     Delete
@@ -178,6 +192,18 @@ export default function PlayersPage() {
               : undefined
           }
           teams={teams}
+        />
+      )}
+
+      {showWarning && (
+        <WarningModal
+          title={showWarning.title}
+          message={showWarning.message}
+          onConfirm={() => {
+            handleDelete(showWarning.data);
+            setShowWarning(null);
+          }}
+          onCancel={() => setShowWarning(null)}
         />
       )}
     </div>
@@ -267,6 +293,43 @@ function PlayerEditModal({
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+function WarningModal({
+  title,
+  message,
+  onConfirm,
+  onCancel,
+}: {
+  title: string;
+  message: string;
+  onConfirm(): void;
+  onCancel(): void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="w-full max-w-sm rounded-xl bg-white px-8 py-6 shadow-lg">
+        <h2 className="mb-4 text-center text-lg font-semibold">{title}</h2>
+        <p className="mb-6 text-gray-600">{message}</p>
+        <div className="flex justify-end gap-2">
+          <button
+            type="button"
+            className="rounded bg-gray-200 px-4 py-1"
+            onClick={onCancel}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="rounded bg-red-500 px-4 py-1 text-white"
+            onClick={onConfirm}
+          >
+            OK
+          </button>
+        </div>
       </div>
     </div>
   );

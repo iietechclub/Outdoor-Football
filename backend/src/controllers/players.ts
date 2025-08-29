@@ -1,11 +1,9 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { db } from "../lib/prisma";
 
 export const getAllPlayers = async (req: Request, res: Response) => {
   try {
-    const players = await prisma.player.findMany({
+    const players = await db.player.findMany({
       include: {
         team: true,
         goals: true,
@@ -20,7 +18,7 @@ export const getAllPlayers = async (req: Request, res: Response) => {
 export const getPlayerById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const player = await prisma.player.findUnique({
+    const player = await db.player.findUnique({
       where: { id },
       include: {
         team: true,
@@ -42,7 +40,7 @@ export const createPlayer = async (req: Request, res: Response) => {
   try {
     const { name, teamId } = req.body;
 
-    const player = await prisma.player.create({
+    const player = await db.player.create({
       data: {
         name,
         teamId,
@@ -63,7 +61,7 @@ export const updatePlayer = async (req: Request, res: Response) => {
     const { id } = req.params;
     const { name, teamId } = req.body;
 
-    const player = await prisma.player.update({
+    const player = await db.player.update({
       where: { id },
       data: {
         name,
@@ -84,9 +82,10 @@ export const deletePlayer = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    await prisma.player.delete({
-      where: { id },
+    await db.goal.deleteMany({
+      where: { playerId: id },
     });
+    await db.player.delete({ where: { id } });
 
     res.status(204).send();
   } catch (error) {
@@ -97,7 +96,7 @@ export const deletePlayer = async (req: Request, res: Response) => {
 export const getPlayersByTeam = async (req: Request, res: Response) => {
   try {
     const { teamId } = req.params;
-    const players = await prisma.player.findMany({
+    const players = await db.player.findMany({
       where: { teamId },
       include: {
         team: true,
