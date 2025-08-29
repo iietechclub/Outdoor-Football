@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import useTimer from "../hooks/useTimer";
-import { useSocket } from "../context/SocketProvider";
+import useSocket from "../context/SocketProvider";
 
 import { cn } from "../lib/utils";
 import MainContainer from "../containers/main-container";

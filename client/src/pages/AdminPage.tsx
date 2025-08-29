@@ -41,12 +41,13 @@ export default function AdminPage() {
         <TabButton label="Players" onClick={() => setTabId("players")} />
       </div>
 
-      <div className="">
+      {/* Admin Panel Tabs */}
+      <>
         {tabId === "live-match" && <LiveMatchPage />}
         {tabId === "matches" && <MatchesPage />}
         {tabId === "teams" && <TeamsPage />}
         {tabId === "players" && <PlayersPage />}
-      </div>
+      </>
     </MainContainer>
   );
 }

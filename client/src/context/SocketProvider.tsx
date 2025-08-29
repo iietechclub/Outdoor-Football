@@ -52,4 +52,5 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   );
 };
 
-export const useSocket = () => useContext(SocketContext);
+const useSocket = () => useContext(SocketContext);
+export default useSocket;

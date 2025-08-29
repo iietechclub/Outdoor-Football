@@ -26,7 +26,7 @@ export default function Leaderboard() {
   }, []);
 
   return (
-    <div className="mb-14 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm lg:mb-20">
+    <div className="mb-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-300 bg-slate-50 px-4 py-3 sm:px-6 sm:py-4">
         <h3 className="text-lg font-semibold text-slate-900 sm:text-xl">
           🏆 Tournament Leaderboard

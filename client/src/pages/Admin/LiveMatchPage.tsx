@@ -1,10 +1,9 @@
+import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
-import MainContainer from "../../containers/main-container";
+import useTimer from "../../hooks/useTimer";
+import useSocket from "../../context/SocketProvider";
 
 import config from "../../lib/config";
-import { useForm } from "react-hook-form";
-import useTimer from "../../hooks/useTimer";
-import { useSocket } from "../../context/SocketProvider";
 
 type Match = {
   id: string;
@@ -84,7 +83,7 @@ export default function LiveMatchPage() {
       : [];
 
   return (
-    <MainContainer>
+    <div className="px-4 py-6 sm:px-6 lg:px-8">
       <h1 className="text-2xl font-bold">Live Match</h1>
       <p className="text-slate-500">
         Details about the live match will be displayed here.
@@ -286,6 +285,6 @@ export default function LiveMatchPage() {
           </div>
         </form>
       </div>
-    </MainContainer>
+    </div>
   );
 }

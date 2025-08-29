@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSocket } from "../context/SocketProvider";
+import useSocket from "../context/SocketProvider";
 
 let timerId: number | null = null;
 
