@@ -6,6 +6,7 @@ import { cn } from "../lib/utils";
 import MainContainer from "../containers/main-container";
 
 import Card from "../components/Card";
+import Leaderboard from "../components/Leaderboard";
 
 type Match = {
   id: string;
@@ -79,10 +80,87 @@ export default function HomePage() {
     };
   }, [socket]);
 
-  if (!match)
-    return (
-      <MainContainer>
-        <Card className="flex h-60 flex-col items-center justify-center space-y-2">
+  return (
+    <MainContainer>
+      {match ? (
+        <>
+          <div className="relative">
+            {notification && (
+              <div className="absolute top-0 left-0 z-10 rounded-xl border border-green-600 bg-green-50 px-5 py-2 font-medium shadow-lg">
+                Goal by{" "}
+                <span className="text-blue-600">{notification.player}</span>{" "}
+                from <span className="text-green-600">{notification.team}</span>
+                .
+              </div>
+            )}
+          </div>
+
+          <Card className="mb-6 space-y-4">
+            <div className="flex justify-center">
+              <span className="inline-flex shrink-0 items-center rounded-full bg-green-100 px-2.5 py-0.5 text-sm font-medium text-slate-800">
+                <div className="flex items-center space-x-2">
+                  <div className="h-2 w-2 animate-pulse rounded-full bg-red-500"></div>
+                  <span className="text-sm font-medium text-slate-600">
+                    LIVE
+                  </span>
+                </div>
+              </span>
+            </div>
+
+            <div className="mb-6 grid grid-cols-3 items-center gap-4 sm:mb-8">
+              <TeamBanner name={match?.homeTeam.name ?? "Home Team"} />
+
+              <div className="text-center">
+                <div className="mb-3 flex items-center justify-center space-x-2 sm:space-x-4">
+                  <div className="text-2xl font-bold text-blue-600 sm:text-4xl">
+                    {scores.home}
+                  </div>
+                  <div className="text-lg font-medium text-slate-400 sm:text-xl">
+                    -
+                  </div>
+                  <div className="text-2xl font-bold text-red-600 sm:text-4xl">
+                    {scores.away}
+                  </div>
+                </div>
+                <div className="text-xs font-medium tracking-wide text-slate-500 uppercase sm:text-sm">
+                  Live Score
+                </div>
+
+                <div className="mt-1">
+                  {penaltyScores && (
+                    <p className="text-sm font-medium tracking-wide text-slate-400">
+                      Penalty: {penaltyScores?.home ?? 0}
+                      {" - "}
+                      {penaltyScores?.away ?? 0}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <TeamBanner
+                name={match?.awayTeam.name ?? "Away Team"}
+                color="red"
+              />
+            </div>
+
+            <div>
+              <p className="mb-2 text-center text-sm font-medium tracking-wide text-slate-400">
+                {match?.stage ?? "Match Stage"}
+              </p>
+              <div className="flex justify-center">
+                <div className="rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-2 text-white shadow-sm">
+                  <div className="text-center">
+                    <div className="rounded-lg bg-transparent px-0 py-0 font-mono text-xl font-bold text-white sm:text-2xl md:text-3xl">
+                      {timer}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </>
+      ) : (
+        <Card className="mb-6 flex h-60 flex-col items-center justify-center space-y-2">
           <div className="mb-4 flex flex-col items-center justify-center">
             <svg
               className="mb-3 size-12 text-slate-400"
@@ -106,78 +184,9 @@ export default function HomePage() {
             updates.
           </p>
         </Card>
-      </MainContainer>
-    );
+      )}
 
-  return (
-    <MainContainer>
-      <div className="relative">
-        {notification && (
-          <div className="absolute top-0 left-0 z-10 rounded-xl border border-green-600 bg-green-50 px-5 py-2 font-medium shadow-lg">
-            Goal by <span className="text-blue-600">{notification.player}</span>{" "}
-            from <span className="text-green-600">{notification.team}</span>.
-          </div>
-        )}
-      </div>
-
-      <Card className="space-y-4">
-        <div className="flex justify-center">
-          <span className="inline-flex shrink-0 items-center rounded-full bg-green-100 px-2.5 py-0.5 text-sm font-medium text-slate-800">
-            <div className="flex items-center space-x-2">
-              <div className="h-2 w-2 animate-pulse rounded-full bg-red-500"></div>
-              <span className="text-sm font-medium text-slate-600">LIVE</span>
-            </div>
-          </span>
-        </div>
-
-        <div className="mb-6 grid grid-cols-3 items-center gap-4 sm:mb-8">
-          <TeamBanner name={match?.homeTeam.name ?? "Home Team"} />
-
-          <div className="text-center">
-            <div className="mb-3 flex items-center justify-center space-x-2 sm:space-x-4">
-              <div className="text-2xl font-bold text-blue-600 sm:text-4xl">
-                {scores.home}
-              </div>
-              <div className="text-lg font-medium text-slate-400 sm:text-xl">
-                -
-              </div>
-              <div className="text-2xl font-bold text-red-600 sm:text-4xl">
-                {scores.away}
-              </div>
-            </div>
-            <div className="text-xs font-medium tracking-wide text-slate-500 uppercase sm:text-sm">
-              Live Score
-            </div>
-
-            <div className="mt-1">
-              {penaltyScores && (
-                <p className="text-sm font-medium tracking-wide text-slate-400">
-                  Penalty: {penaltyScores?.home ?? 0}
-                  {" - "}
-                  {penaltyScores?.away ?? 0}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <TeamBanner name={match?.awayTeam.name ?? "Away Team"} color="red" />
-        </div>
-
-        <div>
-          <p className="mb-2 text-center text-sm font-medium tracking-wide text-slate-400">
-            {match?.stage ?? "Match Stage"}
-          </p>
-          <div className="flex justify-center">
-            <div className="rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-2 text-white shadow-sm">
-              <div className="text-center">
-                <div className="rounded-lg bg-transparent px-0 py-0 font-mono text-xl font-bold text-white sm:text-2xl md:text-3xl">
-                  {timer}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
+      <Leaderboard />
     </MainContainer>
   );
 }

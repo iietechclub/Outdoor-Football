@@ -5,12 +5,16 @@ import {
   createTeam,
   updateTeam,
   deleteTeam,
+  leaderBoardTeams,
 } from "../controllers/teams";
 
 const router = Router();
 
 // Get all teams
 router.get("/", getAllTeams);
+
+// Get all leaderboard teams
+router.get("/leaderboard", leaderBoardTeams);
 
 // Get a single team by ID
 router.get("/:id", getTeamById);

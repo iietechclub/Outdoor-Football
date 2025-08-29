@@ -69,3 +69,76 @@ export const deleteTeam = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to delete team" });
   }
 };
+
+export const leaderBoardTeams = async (_req: Request, res: Response) => {
+  try {
+    const teams = await db.team.findMany({
+      include: {
+        homeMatches: {
+          include: {
+            homeTeamGoals: true,
+            awayTeamGoals: true,
+          },
+        },
+        awayMatches: {
+          include: {
+            homeTeamGoals: true,
+            awayTeamGoals: true,
+          },
+        },
+        goals: true,
+      },
+    });
+
+    const leaderboard = teams
+      .map((team) => {
+        let points = 0;
+        let goalsFor = team.goals.length;
+        let goalsAgainst = 0;
+
+        // Calculate points from home matches
+        team.homeMatches.forEach((match) => {
+          const homeGoals = match.homeTeamGoals.length;
+          const awayGoals = match.awayTeamGoals.length;
+
+          if (homeGoals > awayGoals) {
+            points += 3; // Win
+          } else if (homeGoals === awayGoals) {
+            points += 1; // Draw
+          }
+
+          goalsAgainst += awayGoals;
+        });
+
+        // Calculate points from away matches
+        team.awayMatches.forEach((match) => {
+          const homeGoals = match.homeTeamGoals.length;
+          const awayGoals = match.awayTeamGoals.length;
+
+          if (awayGoals > homeGoals) {
+            points += 3; // Win
+          } else if (awayGoals === homeGoals) {
+            points += 1; // Draw
+          }
+
+          goalsAgainst += homeGoals;
+        });
+
+        const goalDifference = goalsFor - goalsAgainst;
+
+        return {
+          id: team.id,
+          name: team.name,
+          points,
+          goalDifference,
+        };
+      })
+      .sort(
+        (a, b) => b.points - a.points || b.goalDifference - a.goalDifference
+      );
+
+    res.json(leaderboard);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch leaderboard" });
+  }
+};

@@ -103,31 +103,6 @@ io.on("connection", (socket) => {
       select: { id: true, stage: true, status: true },
     });
 
-    if (
-      liveMatch &&
-      liveMatch.stage !== "Halftime" &&
-      liveMatch.stage !== "PenaltyShootout" &&
-      liveMatch.status !== "NotStarted" &&
-      liveMatch.status !== "Finished"
-    ) {
-      if (liveMatch.stage === "FirstHalf") {
-        await db.match.update({
-          where: { id: liveMatch.id },
-          data: { stage: "Halftime", status: "Paused", startTime: null },
-        });
-      } else if (liveMatch.stage === "SecondHalf") {
-        await db.match.update({
-          where: { id: liveMatch.id },
-          data: { status: "Paused", startTime: null },
-        });
-      } else if (liveMatch.stage === "ExtraTime") {
-        await db.match.update({
-          where: { id: liveMatch.id },
-          data: { status: "Paused", startTime: null },
-        });
-      }
-    }
-
     const match = await db.match.findFirst({
       where: { isLive: true },
       select: {
