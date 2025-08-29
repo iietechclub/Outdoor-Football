@@ -433,7 +433,17 @@ io.on("connection", (socket) => {
       },
     });
 
-    socket.emit("match:info", match);
+    io.emit("match:info", match);
+
+    const goalScorer = await db.player.findFirst({
+      where: { id: playerId },
+      select: { name: true, team: { select: { name: true } } },
+    });
+
+    io.emit("goal:scored", {
+      player: goalScorer?.name,
+      team: goalScorer?.team.name,
+    });
   });
 
   socket.on("match:finish", async () => {

@@ -28,9 +28,14 @@ export default function HomePage() {
     away: 0,
   });
   const [penaltyScores, setPenaltyScores] = useState<Scores | null>(null);
+  const [notification, setNotification] = useState<{
+    player: string;
+    team: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!socket) return;
+    let id: number | null = null;
 
     socket.emit("match:request");
     socket.on("match:info", (matchInfo) => {
@@ -56,8 +61,21 @@ export default function HomePage() {
       }
     });
 
+    socket.on("goal:scored", ({ player, team }) => {
+      setNotification({ player, team });
+      id = setTimeout(() => {
+        setNotification(null);
+        if (id) {
+          clearTimeout(id);
+          id = null;
+        }
+      }, 6000);
+    });
+
     return () => {
       socket.off("match:info");
+      socket.off("goal:scored");
+      if (id) clearTimeout(id);
     };
   }, [socket]);
 
@@ -93,6 +111,15 @@ export default function HomePage() {
 
   return (
     <MainContainer>
+      <div className="relative">
+        {notification && (
+          <div className="absolute top-0 left-0 z-10 rounded-xl border border-green-600 bg-green-50 px-5 py-2 font-medium shadow-lg">
+            Goal by <span className="text-blue-600">{notification.player}</span>{" "}
+            from <span className="text-green-600">{notification.team}</span>.
+          </div>
+        )}
+      </div>
+
       <Card className="space-y-4">
         <div className="flex justify-center">
           <span className="inline-flex shrink-0 items-center rounded-full bg-green-100 px-2.5 py-0.5 text-sm font-medium text-slate-800">

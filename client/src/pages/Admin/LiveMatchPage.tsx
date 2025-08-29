@@ -8,6 +8,7 @@ import { useSocket } from "../../context/SocketProvider";
 
 type Match = {
   id: string;
+  stage: string;
   homeTeam: { id: string; name: string };
   awayTeam: { id: string; name: string };
   homeTeamGoals: { isPenalty: boolean }[];
@@ -91,7 +92,7 @@ export default function LiveMatchPage() {
 
       <div>
         <p>
-          Match ID:{" "}
+          Current Match ID:{" "}
           {match === "loading"
             ? "Loading..."
             : match === "not-live"
@@ -99,25 +100,42 @@ export default function LiveMatchPage() {
               : match.id}
         </p>
 
-        <p>Timer: {timer}</p>
-
-        <div className="flex gap-3">
+        <div className="mt-3 ml-4 flex gap-3 text-lg">
+          <p className="font-semibold">
+            Timer: <span className="text-green-600">{timer}</span>
+          </p>
+          {" | "}
           <p>
+            Match State:{" "}
+            <span className="italic">
+              {match === "loading"
+                ? "Loading..."
+                : match === "not-live"
+                  ? "Not Live"
+                  : match.stage}
+            </span>
+          </p>
+        </div>
+
+        <div className="mt-3 ml-4 flex gap-3 text-lg">
+          <p className="font-semibold">
             Goals:{" "}
-            {match === "loading" ? (
-              "Loading..."
-            ) : match === "not-live" ? (
-              "Not Live"
-            ) : (
-              <>
-                {match.homeTeamGoals.filter((g) => !g.isPenalty).length}
-                {" - "}
-                {match.awayTeamGoals.filter((g) => !g.isPenalty).length}
-              </>
-            )}
+            <span className="text-blue-600">
+              {match === "loading" ? (
+                "Loading..."
+              ) : match === "not-live" ? (
+                "Not Live"
+              ) : (
+                <>
+                  {match.homeTeamGoals.filter((g) => !g.isPenalty).length}
+                  {" - "}
+                  {match.awayTeamGoals.filter((g) => !g.isPenalty).length}
+                </>
+              )}
+            </span>
           </p>
           |
-          <p>
+          <p className="text-slate-600">
             Penalty:{" "}
             {match === "loading" ? (
               "Loading..."
