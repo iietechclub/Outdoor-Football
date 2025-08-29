@@ -98,58 +98,99 @@ export const leaderBoardTeams = async (_req: Request, res: Response) => {
     const teams = await db.team.findMany({
       include: {
         homeMatches: {
+          where: { status: "Finished" },
           include: {
             homeTeamGoals: true,
             awayTeamGoals: true,
           },
         },
         awayMatches: {
+          where: { status: "Finished" },
           include: {
             homeTeamGoals: true,
             awayTeamGoals: true,
           },
         },
-        goals: true,
       },
     });
 
     const leaderboard = teams
       .map((team) => {
         let points = 0;
-        let goalsFor = team.goals.length;
+        let goalsFor = 0;
         let goalsAgainst = 0;
 
         // Calculate points from home matches
-        team.homeMatches
-          .filter((m) => m.status === "Finished")
-          .forEach((match) => {
-            const homeGoals = match.homeTeamGoals.length;
-            const awayGoals = match.awayTeamGoals.length;
+        team.homeMatches.forEach((match) => {
+          const homeGoalsRegular = match.homeTeamGoals.filter(
+            (goal) => !goal.isPenalty
+          ).length;
+          const awayGoalsRegular = match.awayTeamGoals.filter(
+            (goal) => !goal.isPenalty
+          ).length;
+          const homeGoalsPenalty = match.homeTeamGoals.filter(
+            (goal) => goal.isPenalty
+          ).length;
+          const awayGoalsPenalty = match.awayTeamGoals.filter(
+            (goal) => goal.isPenalty
+          ).length;
 
-            if (homeGoals > awayGoals) {
-              points += 3; // Win
-            } else if (homeGoals === awayGoals) {
-              points += 1; // Draw
+          // Add goals for/against (only regular time + extra time goals, not penalty shootout)
+          goalsFor += homeGoalsRegular;
+          goalsAgainst += awayGoalsRegular;
+
+          // Determine winner: first check regular goals, then penalty shootout if tied
+          if (homeGoalsRegular > awayGoalsRegular) {
+            points += 3; // Win in regular/extra time
+          } else if (homeGoalsRegular < awayGoalsRegular) {
+            // Loss in regular/extra time
+          } else {
+            // Tied in regular/extra time, check penalty shootout
+            if (homeGoalsPenalty > awayGoalsPenalty) {
+              points += 3; // Win on penalties
+            } else if (homeGoalsPenalty < awayGoalsPenalty) {
+              // Loss on penalties
+            } else {
+              points += 1; // Draw (no penalty shootout or tied penalties)
             }
-
-            goalsAgainst += awayGoals;
-          });
+          }
+        });
 
         // Calculate points from away matches
-        team.awayMatches
-          .filter((m) => m.status === "Finished")
-          .forEach((match) => {
-            const homeGoals = match.homeTeamGoals.length;
-            const awayGoals = match.awayTeamGoals.length;
+        team.awayMatches.forEach((match) => {
+          const homeGoalsRegular = match.homeTeamGoals.filter(
+            (goal) => !goal.isPenalty
+          ).length;
+          const awayGoalsRegular = match.awayTeamGoals.filter(
+            (goal) => !goal.isPenalty
+          ).length;
+          const homeGoalsPenalty = match.homeTeamGoals.filter(
+            (goal) => goal.isPenalty
+          ).length;
+          const awayGoalsPenalty = match.awayTeamGoals.filter(
+            (goal) => goal.isPenalty
+          ).length;
 
-            if (awayGoals > homeGoals) {
-              points += 3; // Win
-            } else if (awayGoals === homeGoals) {
-              points += 1; // Draw
+          // Add goals for/against (only regular time + extra time goals, not penalty shootout)
+          goalsFor += awayGoalsRegular;
+          goalsAgainst += homeGoalsRegular;
+
+          // Determine winner: first check regular goals, then penalty shootout if tied
+          if (awayGoalsRegular > homeGoalsRegular) {
+            points += 3; // Win in regular/extra time
+          } else if (awayGoalsRegular < homeGoalsRegular) {
+            // Loss in regular/extra time
+          } else {
+            // Tied in regular/extra time, check penalty shootout
+            if (awayGoalsPenalty > homeGoalsPenalty) {
+              points += 3; // Win on penalties
+            } else if (awayGoalsPenalty < homeGoalsPenalty) {
+              // Loss on penalties
+            } else {
+              points += 1; // Draw (no penalty shootout or tied penalties)
             }
-
-            goalsAgainst += homeGoals;
-          });
+          }
+        });
 
         const goalDifference = goalsFor - goalsAgainst;
 
