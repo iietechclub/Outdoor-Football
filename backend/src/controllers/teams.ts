@@ -120,32 +120,36 @@ export const leaderBoardTeams = async (_req: Request, res: Response) => {
         let goalsAgainst = 0;
 
         // Calculate points from home matches
-        team.homeMatches.forEach((match) => {
-          const homeGoals = match.homeTeamGoals.length;
-          const awayGoals = match.awayTeamGoals.length;
+        team.homeMatches
+          .filter((m) => m.status === "Finished")
+          .forEach((match) => {
+            const homeGoals = match.homeTeamGoals.length;
+            const awayGoals = match.awayTeamGoals.length;
 
-          if (homeGoals > awayGoals) {
-            points += 3; // Win
-          } else if (homeGoals === awayGoals) {
-            points += 1; // Draw
-          }
+            if (homeGoals > awayGoals) {
+              points += 3; // Win
+            } else if (homeGoals === awayGoals) {
+              points += 1; // Draw
+            }
 
-          goalsAgainst += awayGoals;
-        });
+            goalsAgainst += awayGoals;
+          });
 
         // Calculate points from away matches
-        team.awayMatches.forEach((match) => {
-          const homeGoals = match.homeTeamGoals.length;
-          const awayGoals = match.awayTeamGoals.length;
+        team.awayMatches
+          .filter((m) => m.status === "Finished")
+          .forEach((match) => {
+            const homeGoals = match.homeTeamGoals.length;
+            const awayGoals = match.awayTeamGoals.length;
 
-          if (awayGoals > homeGoals) {
-            points += 3; // Win
-          } else if (awayGoals === homeGoals) {
-            points += 1; // Draw
-          }
+            if (awayGoals > homeGoals) {
+              points += 3; // Win
+            } else if (awayGoals === homeGoals) {
+              points += 1; // Draw
+            }
 
-          goalsAgainst += homeGoals;
-        });
+            goalsAgainst += homeGoals;
+          });
 
         const goalDifference = goalsFor - goalsAgainst;
 
