@@ -34,8 +34,9 @@ export default function HomePage() {
 
     socket.emit("match:request");
     socket.on("match:info", (matchInfo) => {
-      setMatch(matchInfo);
+      if (!matchInfo) return setMatch(null);
 
+      setMatch(matchInfo);
       setScores({
         home: matchInfo.homeTeamGoals.filter((goal: any) => !goal.isPenalty)
           .length,
@@ -59,6 +60,36 @@ export default function HomePage() {
       socket.off("match:info");
     };
   }, [socket]);
+
+  if (!match)
+    return (
+      <MainContainer>
+        <Card className="flex h-60 flex-col items-center justify-center space-y-2">
+          <div className="mb-4 flex flex-col items-center justify-center">
+            <svg
+              className="mb-3 size-12 text-slate-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <h3 className="text-xl font-semibold text-slate-800">
+              No live match
+            </h3>
+          </div>
+          <p className="text-center text-slate-600">
+            There's no match currently being played. Check back later for live
+            updates.
+          </p>
+        </Card>
+      </MainContainer>
+    );
 
   return (
     <MainContainer>

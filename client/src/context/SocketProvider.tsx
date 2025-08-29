@@ -6,6 +6,7 @@ import React, {
   useState,
 } from "react";
 import { io, Socket } from "socket.io-client";
+import config from "../lib/config";
 
 type SocketContextType = {
   socket: Socket | null;
@@ -21,19 +22,12 @@ type SocketProviderProps = {
   children: React.ReactNode;
 };
 
-const socketProtocol =
-  import.meta.env.PROD && !import.meta.env.VITE_DEV ? "wss" : "ws";
-
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef<Socket | null>(null);
 
-  const socketUrl = import.meta.env.DEV
-    ? `${socketProtocol}://localhost:3000`
-    : "";
-
   useEffect(() => {
-    const socket = io(socketUrl, {
+    const socket = io(config.apiUrl, {
       transports: ["websocket"], // allow fallback
       autoConnect: true,
       withCredentials: true,

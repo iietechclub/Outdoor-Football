@@ -24,7 +24,7 @@ type GoalFormValues = {
 export default function LiveMatchPage() {
   const timer = useTimer();
   const { socket } = useSocket();
-  const [match, setMatch] = useState<Match | "loading">("loading");
+  const [match, setMatch] = useState<Match | "loading" | "not-live">("loading");
 
   const [homeTeamPlayers, setHomeTeamPlayers] = useState<Player[]>([]);
   const [awayTeamPlayers, setAwayTeamPlayers] = useState<Player[]>([]);
@@ -51,6 +51,7 @@ export default function LiveMatchPage() {
 
     socket.emit("match:request");
     socket.on("match:info", async (matchInfo) => {
+      if (!matchInfo) return setMatch("not-live");
       setMatch(matchInfo);
 
       if ("homeTeam" in matchInfo && "awayTeam" in matchInfo) {
@@ -75,7 +76,7 @@ export default function LiveMatchPage() {
 
   const selectedTeamId = watch("teamId");
   const players =
-    selectedTeamId && match !== "loading"
+    selectedTeamId && typeof match !== "string"
       ? selectedTeamId === match.homeTeam.id
         ? homeTeamPlayers
         : awayTeamPlayers
@@ -89,7 +90,14 @@ export default function LiveMatchPage() {
       </p>
 
       <div>
-        <p>Match ID: {match === "loading" ? "Loading..." : match.id}</p>
+        <p>
+          Match ID:{" "}
+          {match === "loading"
+            ? "Loading..."
+            : match === "not-live"
+              ? "Not Live"
+              : match.id}
+        </p>
 
         <p>Timer: {timer}</p>
 
@@ -98,6 +106,8 @@ export default function LiveMatchPage() {
             Goals:{" "}
             {match === "loading" ? (
               "Loading..."
+            ) : match === "not-live" ? (
+              "Not Live"
             ) : (
               <>
                 {match.homeTeamGoals.filter((g) => !g.isPenalty).length}
@@ -111,6 +121,8 @@ export default function LiveMatchPage() {
             Penalty:{" "}
             {match === "loading" ? (
               "Loading..."
+            ) : match === "not-live" ? (
+              "Not Live"
             ) : (
               <>
                 {match.homeTeamGoals.filter((g) => g.isPenalty).length}
@@ -176,7 +188,7 @@ export default function LiveMatchPage() {
         </button>
       </div>
 
-      {match !== "loading" && (
+      {typeof match !== "string" && (
         <form onSubmit={handleSubmit(onGoalSubmit)} className="mb-10">
           <h3 className="mb-2 text-center text-2xl font-bold">Make Goals</h3>
 
